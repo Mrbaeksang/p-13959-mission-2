@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html layout:decorate="~{layout}" xmlns:layout="http://www.w3.org/1999/xhtml" xmlns:th="http://www.thymeleaf.org">
+<div layout:fragment="content" class="flex justify-center items-center min-h-screen">
+    <div class="w-full max-w-2xl rounded-2xl shadow-xl bg-black/80 border border-yellow-700 p-8"
+         style="box-shadow:0 0 30px rgba(212,175,55,0.18),inset 0 0 15px rgba(212,175,55,0.12)">
+        <h2 class="text-yellow-400 text-2xl font-cinzel font-bold text-center mb-1 tracking-widest">질문 등록</h2>
+        <p class="text-yellow-200 text-center mb-7">궁금한 점을 자유롭게 질문해주세요!</p>
+        <form th:object="${questionForm}" method="post" class="space-y-6">
+            <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
+            <div th:replace="~{form_errors :: formErrorsFragment}"></div>
+            <div class="relative">
+                <label for="category" class="absolute left-4 top-2 text-yellow-300 pointer-events-none transition-all peer-placeholder-shown:top-2 peer-placeholder-shown:text-base peer-focus:-top-5 peer-focus:text-xs peer-focus:text-yellow-200 peer-focus:font-semibold">
+                    카테고리
+                </label>
+                <select id="category" th:field="*{category}"
+                        class="block w-full px-4 py-2 bg-black/60 border-b-2 border-yellow-400 focus:outline-none focus:ring-2 focus:ring-yellow-300 text-yellow-100 rounded-t-md appearance-none">
+                    <option value="" disabled selected class="text-gray-500">카테고리 선택</option>
+                    <option th:each="cat : ${categoryList}" th:value="${cat.id}" th:text="${cat.name}" class="bg-black text-yellow-100"></option>
+                </select>
+                <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2 text-yellow-300">
+                    <svg class="fill-current h-4 w-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20"><path d="M9.293 12.95l.707.707L15.657 8l-1.414-1.414L10 10.828 5.757 6.586 4.343 8z"/></svg>
+                </div>
+            </div>
+            <div class="relative">
+                <input type="text" id="subject" th:field="*{subject}" required
+                       class="block w-full px-4 py-2 bg-black/60 border-b-2 border-yellow-400 focus:outline-none focus:ring-2 focus:ring-yellow-300 text-yellow-100 peer placeholder-transparent rounded-t-md"
+                       placeholder="제목">
+                <label for="subject"
+                       class="absolute left-4 top-2 text-yellow-300 pointer-events-none transition-all peer-placeholder-shown:top-2 peer-placeholder-shown:text-base peer-focus:-top-5 peer-focus:text-xs peer-focus:text-yellow-200 peer-focus:font-semibold">
+                    제목
+                </label>
+            </div>
+            <div>
+                <label for="markdown-editor-question" class="block text-sm font-semibold text-yellow-300 mb-2">내용</label>
+                <textarea th:field="*{content}" id="markdown-editor-question"
+                          class="form-input w-full border border-yellow-700 rounded-lg p-3 focus:ring-2 focus:ring-yellow-400 bg-black/60 text-yellow-100"
+                          rows="10"></textarea>
+            </div>
+            <button type="submit"
+                    class="w-full bg-yellow-400 hover:bg-yellow-500 text-black font-bold py-2 rounded-xl shadow transition focus:ring-2 focus:ring-yellow-300">
+                저장하기
+            </button>
+        </form>
+    </div>
+</div>
+<script layout:fragment="script">
+    // 질문 폼용 마크다운 에디터 적용
+    document.addEventListener("DOMContentLoaded", function() {
+        if(document.getElementById("markdown-editor-question")) {
+            new SimpleMDE({ element: document.getElementById("markdown-editor-question"),
+                toolbar: ["bold", "italic", "heading", "|", "quote", "code", "unordered-list", "ordered-list", "|", "link", "image", "|", "preview", "guide"]
+            });
+        }
+    });
+</script>
+</html>

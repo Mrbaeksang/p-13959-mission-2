@@ -1,0 +1,57 @@
+<nav th:fragment="navbarFragment" class="bg-white border-b shadow-sm">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div class="flex justify-between h-16 items-center">
+            <!-- 로고 -->
+            <div class="flex-shrink-0 flex items-center">
+                <a class="text-2xl font-bold text-yellow-600 hover:text-yellow-700 tracking-wide" href="/">SBB</a>
+            </div>
+            <!-- 모바일 토글 버튼 -->
+            <div class="flex md:hidden">
+                <button id="nav-toggle" type="button" class="text-gray-600 hover:text-yellow-600 focus:outline-none">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" />
+                    </svg>
+                </button>
+            </div>
+            <!-- 메뉴 항목 -->
+            <div id="nav-menu" class="hidden md:flex space-x-4 items-center">
+                <!-- 비로그인 -->
+                <a class="text-gray-700 hover:text-yellow-600 px-3 py-2 rounded transition" th:href="@{/user/login}" sec:authorize="isAnonymous()">로그인</a>
+                <a class="text-gray-700 hover:text-yellow-600 px-3 py-2 rounded transition" th:href="@{/user/signup}" sec:authorize="isAnonymous()">회원가입</a>
+                <!-- 로그인 -->
+                <form th:action="@{/user/logout}" method="post" sec:authorize="isAuthenticated()" class="inline">
+                    <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
+                    <button type="submit" class="text-gray-700 hover:text-yellow-600 px-3 py-2 rounded transition bg-transparent border-0">로그아웃</button>
+                </form>
+                <a class="text-gray-700 hover:text-yellow-600 px-3 py-2 rounded transition" th:href="@{/user/profile}" sec:authorize="isAuthenticated()">내정보</a>
+                <a class="text-gray-700 hover:text-yellow-600 px-3 py-2 rounded transition" th:href="@{|/user/profile/${#authentication.name}|}" sec:authorize="isAuthenticated()">내 프로필</a>
+            </div>
+        </div>
+    </div>
+    <!-- 모바일 메뉴 (토글) -->
+    <div id="mobile-menu" class="md:hidden hidden px-4 pb-4">
+        <div class="flex flex-col gap-1">
+            <a class="text-gray-700 hover:text-yellow-600 px-3 py-2 rounded transition" th:href="@{/user/login}" sec:authorize="isAnonymous()">로그인</a>
+            <a class="text-gray-700 hover:text-yellow-600 px-3 py-2 rounded transition" th:href="@{/user/signup}" sec:authorize="isAnonymous()">회원가입</a>
+            <form th:action="@{/user/logout}" method="post" sec:authorize="isAuthenticated()" class="inline">
+                <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
+                <button type="submit" class="text-gray-700 hover:text-yellow-600 px-3 py-2 rounded transition bg-transparent border-0 w-full text-left">로그아웃</button>
+            </form>
+            <a class="text-gray-700 hover:text-yellow-600 px-3 py-2 rounded transition" th:href="@{/user/profile}" sec:authorize="isAuthenticated()">내정보</a>
+            <a class="text-gray-700 hover:text-yellow-600 px-3 py-2 rounded transition" th:href="@{|/user/profile/${#authentication.name}|}" sec:authorize="isAuthenticated()">내 프로필</a>
+        </div>
+    </div>
+    <script>
+        // 모바일 메뉴 토글 JS
+        document.addEventListener('DOMContentLoaded', function() {
+            const navToggle = document.getElementById('nav-toggle');
+            const navMenu = document.getElementById('nav-menu');
+            const mobileMenu = document.getElementById('mobile-menu');
+            if(navToggle){
+                navToggle.addEventListener('click', function() {
+                    mobileMenu.classList.toggle('hidden');
+                });
+            }
+        });
+    </script>
+</nav>

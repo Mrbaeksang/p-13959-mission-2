@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html lang="ko" xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout" xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Hello, sbb!</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/simplemde/latest/simplemde.min.css">
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;700&family=Poppins:wght@300;400;500;600&display=swap">
+    <style>
+        body {
+            /* 로그인 폼과 동일한 배경 스타일 적용 */
+            font-family: 'Poppins', sans-serif;
+            background: linear-gradient(to bottom right, #0a0a0a, #1a1a1a); /* 더 깊이 있는 어두운 배경 */
+            color: #d1d5db; /* 기본 텍스트 색상을 약간 밝은 회색으로 */
+            min-height: 100vh; /* 최소 높이 뷰포트 전체로 설정 */
+            display: flex;
+            flex-direction: column; /* 세로 방향으로 정렬 */
+        }
+        .font-cinzel {
+            font-family: 'Cinzel', serif;
+        }
+        #particles-js {
+            position: fixed;
+            width: 100vw;
+            height: 100vh;
+            left: 0; top: 0;
+            z-index: 0; /* 내용물 아래로 */
+            pointer-events: none; /* 클릭 이벤트 방지 */
+        }
+        /* SimpleMDE 에디터 배경색 조정 (어두운 테마와 어울리도록) */
+        .CodeMirror, .CodeMirror-scroll {
+            background-color: #1a1a1a !important; /* 어두운 배경 */
+            color: #d1d5db !important; /* 텍스트 색상 */
+        }
+        .editor-toolbar {
+            background-color: #2a2a2a !important; /* 툴바 배경 */
+            border-bottom-color: #D4AF37 !important; /* 테두리 색상 */
+        }
+        .editor-toolbar a {
+            color: #d1d5db !important; /* 툴바 아이콘 색상 */
+        }
+        .editor-toolbar a.active, .editor-toolbar a:hover {
+            background-color: #D4AF37 !important; /* 활성화/호버 시 배경 */
+            color: #000 !important; /* 활성화/호버 시 텍스트 색상 */
+        }
+        .CodeMirror-fullscreen {
+            background-color: #0a0a0a !important;
+        }
+    </style>
+</head>
+<body>
+
+<div id="particles-js"></div>
+
+<nav class="relative z-10 bg-black/80 border-b border-yellow-700 shadow-md py-4">
+    <div class="max-w-7xl mx-auto px-4 flex justify-between items-center">
+        <a href="/" class="text-yellow-400 text-2xl font-cinzel font-bold tracking-widest">SBB</a>
+        <div class="flex items-center space-x-4">
+            <a sec:authorize="isAnonymous()" th:href="@{/user/login}" class="text-yellow-200 hover:text-yellow-400 px-3 py-2 rounded-md text-sm font-medium transition-colors">로그인</a>
+            <a sec:authorize="isAnonymous()" th:href="@{/user/signup}" class="text-yellow-200 hover:text-yellow-400 px-3 py-2 rounded-md text-sm font-medium transition-colors">회원가입</a>
+            <form th:action="@{/user/logout}" method="post" sec:authorize="isAuthenticated()" class="inline">
+                <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
+                <button type="submit" class="text-yellow-200 hover:text-yellow-400 px-3 py-2 rounded-md text-sm font-medium transition-colors bg-transparent border-0">로그아웃</button>
+            </form>
+            <a sec:authorize="isAuthenticated()" th:href="@{/user/profile}" class="text-yellow-200 hover:text-yellow-400 px-3 py-2 rounded-md text-sm font-medium transition-colors">내정보</a>
+            <a sec:authorize="isAuthenticated()" th:href="@{|/user/profile/${#authentication.name}|}" class="text-yellow-200 hover:text-yellow-400 px-3 py-2 rounded-md text-sm font-medium transition-colors">내 프로필</a>
+            <a th:href="@{/question/list}" class="text-yellow-200 hover:text-yellow-400 px-3 py-2 rounded-md text-sm font-medium transition-colors">질문 목록</a>
+        </div>
+    </div>
+</nav>
+
+<main class="relative z-10 flex-1 container mx-auto px-4 py-8">
+    <th:block layout:fragment="content"></th:block>
+</main>
+
+<footer class="relative z-10 bg-black/80 border-t border-yellow-700 shadow-md py-6 mt-auto text-center text-yellow-300 text-sm">
+    &copy; 2025 SBB. All rights reserved.
+</footer>
+
+<script src="https://cdn.jsdelivr.net/simplemde/latest/simplemde.min.js"></script>
+<script src="https://cdn.jsdelivr.net/particles.js/2.0.0/particles.min.js"></script>
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // particles.js 설정 (로그인 페이지와 동일)
+        particlesJS('particles-js', {
+            "particles": {
+                "number": { "value": 100, "density": { "enable": true, "value_area": 800 } },
+                "color": { "value": "#ffd700" }, /* 황금색 */
+                "shape": { "type": "circle" },
+                "opacity": { "value": 0.8, "random": true },
+                "size": { "value": 5, "random": true },
+                "line_linked": {
+                    "enable": true, "distance": 150,
+                    "color": "#ffd700", "opacity": 0.6, "width": 1.5
+                },
+                "move": {
+                    "enable": true, "speed": 2, "direction": "none",
+                    "random": true, "straight": false, "out_mode": "out", "bounce": false,
+                    "attract": { "enable": true, "rotateX": 600, "rotateY": 1200 }
+                }
+            },
+            "interactivity": {
+                "detect_on": "canvas",
+                "events": {
+                    "onhover": { "enable": true, "mode": "repulse" },
+                    "onclick": { "enable": true, "mode": "push" },
+                    "resize": true
+                },
+                "modes": {
+                    "grab": { "distance": 400, "line_linked": { "opacity": 1 } },
+                    "bubble": { "distance": 400, "size": 40, "duration": 2, "opacity": 8, "speed": 3 },
+                    "repulse": { "distance": 100, "duration": 0.4 },
+                    "push": { "particles_nb": 4 }, "remove": { "particles_nb": 2 }
+                }
+            },
+            "retina_detect": true
+        });
+    });
+</script>
+<th:block layout:fragment="script"></th:block>
+</body>
+</html>

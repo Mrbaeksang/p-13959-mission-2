@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html layout:decorate="~{layout}" xmlns:layout="http://www.w3.org/1999/xhtml" xmlns:th="http://www.thymeleaf.org">
+<div layout:fragment="content" class="mx-auto max-w-7xl px-4 py-10">
+    <div class="flex flex-col md:flex-row gap-10">
+        <section class="flex-1">
+            <div class="flex flex-col sm:flex-row justify-between items-center mb-7 gap-4">
+                <a th:href="@{/question/create}" class="bg-gradient-to-r from-yellow-500 to-yellow-600 hover:from-yellow-600 hover:to-yellow-700 text-black font-bold px-7 py-3 rounded-xl shadow-lg transition-all text-base tracking-wide border border-yellow-400">
+                    + 질문 등록하기
+                </a>
+                <form class="flex w-full sm:w-auto gap-2" onsubmit="return false;">
+                    <input type="text" id="search_kw"
+                           class="form-input border border-yellow-600 rounded-lg px-4 py-2 w-full sm:w-64 focus:outline-none focus:ring-2 focus:ring-yellow-400 bg-black/70 text-yellow-100 placeholder-yellow-300"
+                           th:value="${kw}" placeholder="검색어 입력">
+                    <button class="bg-yellow-400 hover:bg-yellow-500 text-black rounded-lg px-5 py-2 font-semibold shadow transition"
+                            type="button" id="btn_search">찾기</button>
+                </form>
+            </div>
+            <div class="overflow-x-auto rounded-2xl shadow-xl bg-black/80 border border-yellow-700" style="box-shadow:0 0 30px rgba(212,175,55,0.18),inset 0 0 15px rgba(212,175,55,0.12)">
+                <table class="min-w-full text-sm">
+                    <thead>
+                    <tr class="bg-gradient-to-r from-yellow-700 to-yellow-800 text-yellow-100 text-center">
+                        <th class="py-4 px-3">번호</th>
+                        <th class="py-4 px-3 w-1/2 text-left">제목</th>
+                        <th class="py-4 px-3">글쓴이</th>
+                        <th class="py-4 px-3">작성일시</th>
+                        <th class="py-4 px-3">카테고리</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    <tr th:each="question, loop : ${paging}" class="border-b border-yellow-900 hover:bg-black/60 text-yellow-200 transition-colors">
+                        <td th:text="${paging.getTotalElements - (paging.number * paging.size) - loop.index}" class="py-3 px-2"></td>
+                        <td class="text-left py-3 px-2">
+                            <a th:href="@{|/question/detail/${question.id}|}"
+                               th:text="${question.subject}"
+                               class="text-yellow-300 font-semibold hover:underline hover:text-yellow-400 transition"></a>
+                            <span class="ml-2 text-xs bg-yellow-600 text-white rounded-full px-2 py-0.5 font-bold"
+                                  th:if="${#lists.size(question.answerList) > 0}"
+                                  th:text="${#lists.size(question.answerList)}"></span>
+                        </td>
+                        <td>
+                            <span th:if="${question.author != null}" th:text="${question.author.username}"></span>
+                        </td>
+                        <td th:text="${question.createDate != null ? #temporals.format(question.createDate, 'yyyy-MM-dd HH:mm') : '-'}"></td>
+                        <td th:text="${question.category != null ? question.category.name : '-'}"></td>
+                    </tr>
+                    </tbody>
+                </table>
+            </div>
+            <div th:if="${!paging.isEmpty()}" class="flex justify-center my-10">
+                <ul class="inline-flex space-x-1">
+                    <li th:classappend="${!paging.hasPrevious} ? 'opacity-40 pointer-events-none'">
+                        <a class="px-4 py-2 rounded-lg bg-yellow-800 text-yellow-200 hover:bg-yellow-700 transition" href="javascript:void(0)" th:data-page="${paging.number-1}">이전</a>
+                    </li>
+                    <li th:each="page: ${#numbers.sequence(0, paging.totalPages-1)}"
+                        th:if="${page >= paging.number-3 and page <= paging.number+3}"
+                        th:classappend="${page == paging.number} ? 'font-extrabold bg-yellow-400 text-black shadow' : 'bg-yellow-900 text-yellow-200'"
+                        class="px-4 py-2 rounded-lg transition">
+                        <a th:text="${page+1}" class="block" href="javascript:void(0)" th:data-page="${page}"></a>
+                    </li>
+                    <li th:classappend="${!paging.hasNext} ? 'opacity-40 pointer-events-none'">
+                        <a class="px-4 py-2 rounded-lg bg-yellow-800 text-yellow-200 hover:bg-yellow-700 transition" href="javascript:void(0)" th:data-page="${paging.number+1}">다음</a>
+                    </li>
+                </ul>
+            </div>
+            <form th:action="@{/question/list}" method="get" id="searchForm">
+                <input type="hidden" id="kw" name="kw" th:value="${kw}">
+                <input type="hidden" id="page" name="page" th:value="${paging.number}">
+            </form>
+        </section>
+
+        <aside class="w-full md:w-80 shrink-0 flex flex-col gap-8">
+            <div class="bg-black/80 rounded-2xl shadow-xl p-6 border border-yellow-700" style="box-shadow:0 0 30px rgba(212,175,55,0.18),inset 0 0 15px rgba(212,175,55,0.12)">
+                <h5 class="font-bold text-yellow-400 border-b-2 border-yellow-700 pb-2 mb-4 text-lg tracking-wider font-cinzel">최근 답변</h5>
+                <ul class="divide-y divide-yellow-900">
+                    <li class="py-3" th:each="a : ${recentAnswers}">
+                        <a th:href="@{|/question/detail/${a.question.id}|}" th:text="${a.content}" class="block text-yellow-200 hover:text-yellow-400 font-medium truncate"></a>
+                        <div class="flex justify-between text-xs text-yellow-500 mt-1">
+                            <span th:text="${a.author != null ? a.author.username : '-'}"></span>
+                            <span th:text="${a.createDate != null ? #temporals.format(a.createDate, 'yyyy-MM-dd HH:mm') : '-'}"></span>
+                        </div>
+                    </li>
+                    <li class="py-3 text-center text-yellow-600" th:if="${#lists.isEmpty(recentAnswers)}">최근 답변이 없습니다.</li>
+                </ul>
+            </div>
+            <div class="bg-black/80 rounded-2xl shadow-xl p-6 border border-yellow-700" style="box-shadow:0 0 30px rgba(212,175,55,0.18),inset 0 0 15px rgba(212,175,55,0.12)">
+                <h5 class="font-bold text-yellow-400 border-b-2 border-yellow-700 pb-2 mb-4 text-lg tracking-wider font-cinzel">최근 댓글</h5>
+                <ul class="divide-y divide-yellow-900">
+                    <li class="py-3" th:each="c : ${recentComments}">
+                        <span th:if="${c.question != null}">
+                            <a th:href="@{|/question/detail/${c.question.id}|}" th:text="'질문: ' + ${c.content}" class="block text-yellow-200 hover:text-yellow-400 truncate"></a>
+                        </span>
+                        <span th:if="${c.answer != null}">
+                            <a th:href="@{|/question/detail/${c.answer.question.id}|}" th:text="'답변: ' + ${c.content}" class="block text-yellow-200 hover:text-yellow-400 truncate"></a>
+                        </span>
+                        <div class="flex justify-between text-xs text-yellow-500 mt-1">
+                            <span th:text="${c.author != null ? c.author.username : '-'}"></span>
+                            <span th:text="${c.createDate != null ? #temporals.format(c.createDate, 'yyyy-MM-dd HH:mm') : '-'}"></span>
+                        </div>
+                    </li>
+                    <li class="py-3 text-center text-yellow-600" th:if="${#lists.isEmpty(recentComments)}">최근 댓글이 없습니다.</li>
+                </ul>
+            </div>
+        </aside>
+    </div>
+</div>
+<script layout:fragment="script" type='text/javascript'>
+    Array.from(document.querySelectorAll("[data-page]")).forEach(function(element) {
+        element.addEventListener('click', function() {
+            document.getElementById('page').value = this.dataset.page;
+            document.getElementById('searchForm').submit();
+        });
+    });
+    const btn_search = document.getElementById("btn_search");
+    btn_search.addEventListener('click', function() {
+        document.getElementById('kw').value = document.getElementById('search_kw').value;
+        document.getElementById('page').value = 0;
+        document.getElementById('searchForm').submit();
+    });
+</script>
+</html>

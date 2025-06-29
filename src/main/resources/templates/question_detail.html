@@ -1,0 +1,216 @@
+<!doctype html>
+<html layout:decorate="~{layout}" xmlns:layout="http://www.w3.org/1999/xhtml" xmlns:sec="http://www.w3.org/1999/xhtml" xmlns:th="http://www.thymeleaf.org">
+
+<div layout:fragment="content" class="mx-auto max-w-7xl px-4 py-10">
+
+    <h2 class="border-b-2 border-yellow-700 py-4 mb-6 text-yellow-300 text-3xl font-bold font-cinzel tracking-wider" th:text="${question.subject}">제목</h2>
+
+    <div class="mb-4 flex flex-wrap items-center gap-2">
+        <span class="px-3 py-1 rounded-full bg-yellow-600 text-white text-xs font-semibold" th:if="${question.category != null}" th:text="${question.category.name}">카테고리</span>
+        <span class="px-3 py-1 rounded-full bg-yellow-400 text-black text-xs font-semibold">
+            조회수 <span th:text="${question.views}"></span>
+        </span>
+    </div>
+
+    <div class="bg-black/80 rounded-2xl shadow-xl p-8 border border-yellow-700 mb-8"
+         style="box-shadow:0 0 30px rgba(212,175,55,0.2);">
+        <div class="prose prose-invert max-w-none text-gray-300" th:utext="${@commonUtil.markdown(question.content)}"></div>
+        <div class="mt-6 flex justify-end items-center text-xs text-gray-400">
+            <div th:if="${question.modifyDate != null}" class="mr-4">
+                <span class="block">modified at</span>
+                <span th:text="${#temporals.format(question.modifyDate, 'yyyy-MM-dd HH:mm')}"></span>
+            </div>
+            <div>
+                <span th:if="${question.author != null}" class="block text-right text-yellow-400 font-semibold" th:text="${question.author.username}">작성자</span>
+                <span class="block text-right" th:text="${#temporals.format(question.createDate, 'yyyy-MM-dd HH:mm')}"></span>
+            </div>
+        </div>
+        <div class="mt-6 flex gap-2 justify-start">
+            <a href="javascript:void(0);" th:data-uri="@{|/question/vote/${question.id}|}"
+               class="btn bg-yellow-500 hover:bg-yellow-600 text-black font-bold py-2 px-4 rounded-lg transition recommend"
+               sec:authorize="isAuthenticated()">
+                추천
+            </a>
+            <a th:href="@{|/question/modify/${question.id}|}"
+               class="btn bg-gray-700 hover:bg-gray-600 text-gray-200 font-bold py-2 px-4 rounded-lg transition"
+               sec:authorize="isAuthenticated()"
+               th:if="${question.author != null and #authentication.getPrincipal().getUsername() == question.author.username}">
+                수정
+            </a>
+            <a href="javascript:void(0);" th:data-uri="@{|/question/delete/${question.id}|}"
+               class="btn bg-red-600 hover:bg-red-700 text-white font-bold py-2 px-4 rounded-lg transition delete"
+               sec:authorize="isAuthenticated()"
+               th:if="${question.author != null and #authentication.getPrincipal().getUsername() == question.author.username}">
+                삭제
+            </a>
+        </div>
+    </div>
+
+    <div class="mb-8">
+        <h6 class="text-xl font-semibold text-gray-200 mb-4">질문에 달린 댓글</h6>
+        <ul class="space-y-4">
+            <li class="bg-gray-900 rounded-lg p-4 flex justify-between items-center border border-gray-700" th:each="comment : ${commentListForQuestion}">
+                <span class="text-gray-300" th:text="${comment.content}">댓글내용</span>
+                <span class="flex gap-2">
+                    <a th:href="@{|/comment/modify/${comment.id}|}"
+                       class="btn bg-gray-700 hover:bg-gray-600 text-gray-200 font-bold py-1 px-3 rounded-md transition"
+                       sec:authorize="isAuthenticated()"
+                       th:if="${comment.author?.username == #authentication.name}">수정</a>
+                    <a href="javascript:void(0);" th:data-uri="@{|/comment/delete/${comment.id}|}"
+                       class="btn bg-red-600 hover:bg-red-700 text-white font-bold py-1 px-3 rounded-md transition delete"
+                       sec:authorize="isAuthenticated()"
+                       th:if="${comment.author?.username == #authentication.name}">삭제</a>
+                </span>
+            </li>
+            <li th:if="${#lists.isEmpty(commentListForQuestion)}" class="text-gray-400 text-center py-4">
+                아직 이 질문에 대한 댓글이 없습니다.
+            </li>
+        </ul>
+    </div>
+
+    <form th:action="@{|/comment/create/question/${question.id}|}" th:object="${commentForm}" method="post" class="bg-black/80 rounded-2xl shadow-xl p-8 border border-yellow-700 mb-8" style="box-shadow:0 0 30px rgba(212,175,55,0.2);">
+        <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
+        <div class="relative mb-6">
+            <textarea th:field="*{content}" id="question-comment-content"
+                      class="peer block w-full px-4 py-2 bg-black/60 border-b-2 border-gray-600 text-gray-200 rounded-t-md focus:outline-none focus:border-yellow-400 focus:ring-1 focus:ring-yellow-400 pt-8"
+                      rows="3" placeholder=" "></textarea>
+            <label for="question-comment-content"
+                   class="absolute left-4 top-2 text-yellow-300 pointer-events-none transition-all peer-placeholder-shown:top-2 peer-placeholder-shown:text-base peer-focus:-top-5 peer-focus:text-xs peer-focus:text-yellow-200 peer-focus:font-semibold">
+                댓글 작성
+            </label>
+        </div>
+        <button type="submit" class="btn bg-yellow-500 hover:bg-yellow-600 text-black font-bold py-2 px-6 rounded-xl shadow transition focus:ring-2 focus:ring-yellow-300" sec:authorize="isAuthenticated()">
+            등록
+        </button>
+        <div class="text-yellow-600 text-sm mt-2" sec:authorize="isAnonymous()">로그인 후 댓글을 등록할 수 있습니다.</div>
+    </form>
+
+
+    <h5 class="border-b-2 border-yellow-700 py-4 mt-8 mb-6 text-yellow-300 text-3xl font-bold font-cinzel tracking-wider" th:text="|총 ${answerPage.totalElements}개의 답변이 있습니다.|"></h5>
+
+    <div class="mb-6 text-gray-400">
+        <a th:href="@{|?sort=recent|}" th:classappend="${sort == 'recent'} ? 'font-bold text-yellow-400'" class="hover:text-yellow-300 transition">최신순</a>
+        <span class="mx-2">|</span>
+        <a th:href="@{|?sort=vote|}" th:classappend="${sort == 'vote'} ? 'font-bold text-yellow-400'" class="hover:text-yellow-300 transition">추천순</a>
+    </div>
+
+    <div th:each="answer : ${answerPage.content}" class="bg-black/80 rounded-2xl shadow-xl p-8 border border-yellow-700 mb-8" style="box-shadow:0 0 30px rgba(212,175,55,0.2);">
+        <a th:id="|answer_${answer.id}|"></a>
+        <div class="prose prose-invert max-w-none text-gray-300" th:utext="${@commonUtil.markdown(answer.content)}"></div>
+        <div class="mt-6 flex justify-between items-center">
+            <a href="javascript:void(0);" th:data-uri="@{|/answer/vote/${answer.id}|}"
+               class="btn bg-green-600 hover:bg-green-700 text-white font-bold py-2 px-4 rounded-lg transition recommend">
+                추천 <span class="ml-1 text-xs font-semibold" th:text="${#lists.size(answer.voter)}">0</span>
+            </a>
+            <div class="flex items-center text-xs text-gray-400">
+                <div th:if="${answer.modifyDate != null}" class="mr-4">
+                    <span class="block">modified at</span>
+                    <span th:text="${#temporals.format(answer.modifyDate, 'yyyy-MM-dd HH:mm')}"></span>
+                </div>
+                <div>
+                    <span class="block text-right text-yellow-400 font-semibold" th:text="${answer.author.username}">답변자</span>
+                    <span class="block text-right" th:text="${#temporals.format(answer.createDate, 'yyyy-MM-dd HH:mm')}"></span>
+                </div>
+            </div>
+        </div>
+        <div class="mt-6 flex gap-2 justify-start">
+            <a th:href="@{|/answer/modify/${answer.id}|}"
+               class="btn bg-gray-700 hover:bg-gray-600 text-gray-200 font-bold py-2 px-4 rounded-lg transition"
+               sec:authorize="isAuthenticated()"
+               th:if="${answer.author != null and #authentication.getPrincipal().getUsername() == answer.author.username}">
+                수정
+            </a>
+            <a href="javascript:void(0);" th:data-uri="@{|/answer/delete/${answer.id}|}"
+               class="btn bg-red-600 hover:bg-red-700 text-white font-bold py-2 px-4 rounded-lg transition delete"
+               sec:authorize="isAuthenticated()"
+               th:if="${answer.author != null and #authentication.getPrincipal().getUsername() == answer.author.username}">
+                삭제
+            </a>
+        </div>
+
+        <div class="mt-8 pl-6 border-l border-gray-700">
+            <h6 class="text-lg font-semibold text-gray-200 mb-3">댓글</h6>
+            <ul class="space-y-3">
+                <li class="bg-gray-900 rounded-lg p-3 flex justify-between items-center text-sm border border-gray-800" th:each="comment : ${commentMap[answer.id]}">
+                    <span class="text-gray-300" th:text="${comment.content}">댓글내용</span>
+                    <span class="flex gap-2">
+                        <a th:href="@{|/comment/modify/${comment.id}|}"
+                           class="btn bg-gray-700 hover:bg-gray-600 text-gray-200 font-bold py-1 px-3 rounded-md transition"
+                           sec:authorize="isAuthenticated()"
+                           th:if="${comment.author?.username == #authentication.name}">수정</a>
+                        <a href="javascript:void(0);" th:data-uri="@{|/comment/delete/${comment.id}|}"
+                           class="btn bg-red-600 hover:bg-red-700 text-white font-bold py-1 px-3 rounded-md transition delete"
+                           sec:authorize="isAuthenticated()"
+                           th:if="${comment.author?.username == #authentication.name}">삭제</a>
+                    </span>
+                </li>
+                <li th:if="${#lists.isEmpty(commentMap[answer.id])}" class="text-gray-500 text-center py-2">
+                    아직 이 답변에 대한 댓글이 없습니다.
+                </li>
+            </ul>
+
+            <form th:action="@{|/comment/create/answer/${answer.id}|}" th:object="${commentForm}" method="post" class="mt-4">
+                <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
+                <div class="relative mb-4">
+                    <textarea th:field="*{content}" id="answer-comment-content"
+                              class="peer block w-full px-4 py-2 bg-black/60 border-b-2 border-gray-600 text-gray-200 rounded-t-md focus:outline-none focus:border-yellow-400 focus:ring-1 focus:ring-yellow-400 pt-8"
+                              rows="2" placeholder=" "></textarea>
+                    <label for="answer-comment-content"
+                           class="absolute left-4 top-2 text-yellow-300 pointer-events-none transition-all peer-placeholder-shown:top-2 peer-placeholder-shown:text-base peer-focus:-top-5 peer-focus:text-xs peer-focus:text-yellow-200 peer-focus:font-semibold">
+                        댓글 작성
+                    </label>
+                </div>
+                <button type="submit" class="btn bg-yellow-500 hover:bg-yellow-600 text-black font-bold py-2 px-6 rounded-xl shadow transition focus:ring-2 focus:ring-yellow-300" sec:authorize="isAuthenticated()">
+                    등록
+                </button>
+                <div class="text-yellow-600 text-sm mt-2" sec:authorize="isAnonymous()">로그인 후 댓글을 등록할 수 있습니다.</div>
+            </form>
+        </div>
+    </div>
+
+    <nav class="mt-10">
+        <ul class="flex justify-center items-center space-x-2 text-gray-300">
+            <li class="page-item" th:classappend="${answerPage.first} ? 'opacity-50 cursor-not-allowed'">
+                <a class="px-4 py-2 rounded-lg bg-gray-800 hover:bg-gray-700 transition" th:href="@{|?page=${answerPage.number - 1}&sort=${sort}|}">이전</a>
+            </li>
+            <li class="page-item" th:each="i : ${#numbers.sequence(0, answerPage.totalPages - 1)}" th:classappend="${i == answerPage.number} ? 'bg-yellow-600 text-white font-bold rounded-lg' : 'bg-gray-800 hover:bg-gray-700 rounded-lg transition'">
+                <a class="px-4 py-2 block" th:href="@{|?page=${i}&sort=${sort}|}" th:text="${i + 1}">1</a>
+            </li>
+            <li class="page-item" th:classappend="${answerPage.last} ? 'opacity-50 cursor-not-allowed'">
+                <a class="px-4 py-2 rounded-lg bg-gray-800 hover:bg-gray-700 transition" th:href="@{|?page=${answerPage.number + 1}&sort=${sort}|}">다음</a>
+            </li>
+        </ul>
+    </nav>
+
+    <form th:action="@{|/answer/create/${question.id}|}" th:object="${answerForm}" method="post" class="bg-black/80 rounded-2xl shadow-xl p-8 border border-yellow-700 my-8" style="box-shadow:0 0 30px rgba(212,175,55,0.2);">
+        <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
+        <div th:replace="~{form_errors :: formErrorsFragment}"></div>
+        <div class="relative mb-6">
+            <textarea th:field="*{content}" id="answer-content"
+                      class="peer block w-full px-4 py-2 bg-black/60 border-b-2 border-gray-600 text-gray-200 rounded-t-md focus:outline-none focus:border-yellow-400 focus:ring-1 focus:ring-yellow-400 pt-8"
+                      rows="8" placeholder=" " sec:authorize="isAuthenticated()"></textarea>
+            <textarea class="block w-full px-4 py-2 bg-black/60 border-b-2 border-gray-600 text-gray-500 rounded-t-md cursor-not-allowed"
+                      rows="8" disabled sec:authorize="isAnonymous()">로그인 후 작성할 수 있습니다.</textarea>
+
+            <label for="answer-content"
+                   class="absolute left-4 top-2 text-yellow-300 pointer-events-none transition-all peer-placeholder-shown:top-2 peer-placeholder-shown:text-base peer-focus:-top-5 peer-focus:text-xs peer-focus:text-yellow-200 peer-focus:font-semibold"
+                   sec:authorize="isAuthenticated()">
+                답변 내용
+            </label>
+        </div>
+
+        <button type="submit" class="btn bg-yellow-500 hover:bg-yellow-600 text-black font-bold py-2 px-6 rounded-xl shadow transition focus:ring-2 focus:ring-yellow-300" sec:authorize="isAuthenticated()">답변등록</button>
+        <div class="text-yellow-600 text-sm mt-2" sec:authorize="isAnonymous()">로그인 후 답변을 등록할 수 있습니다.</div>
+    </form>
+
+</div>
+
+<script layout:fragment="script" type="text/javascript">
+    document.querySelectorAll(".delete").forEach(e => e.addEventListener("click", () => {
+        if (confirm("정말로 삭제하시겠습니까?")) location.href = e.dataset.uri;
+    }));
+    document.querySelectorAll(".recommend").forEach(e => e.addEventListener("click", () => {
+        if (confirm("정말로 추천하시겠습니까?")) location.href = e.dataset.uri;
+    }));
+</script>
+</html>

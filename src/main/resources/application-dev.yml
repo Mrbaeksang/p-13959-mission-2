@@ -1,0 +1,39 @@
+spring:
+  thymeleaf:
+    cache: false
+    prefix: file:src/main/resources/templates/
+  datasource:
+    url: jdbc:h2:./db_dev;MODE=MySQL
+    username: sa
+    password:
+    driver-class-name: org.h2.Driver
+
+  mail:
+    host: smtp.gmail.com
+    port: 587
+    username: your-gmail@gmail.com      # 실제 Gmail 계정
+    password: your-app-password         # 앱 비밀번호 사용!
+    properties:
+      mail:
+        smtp:
+          auth: true
+          starttls:
+            enable: true
+          timeout: 5000
+
+  security:
+    oauth2:
+      client:
+        registration:
+          google:
+            client-id: 861952693060-mqgiu6ee6hbeosmqtpb9gs29jj81oct4.apps.googleusercontent.com
+            client-secret: 보안
+            scope:
+              - email
+              - profile
+        provider:
+          google:
+            authorization-uri: https://accounts.google.com/o/oauth2/auth
+            token-uri: https://oauth2.googleapis.com/token
+            user-info-uri: https://openidconnect.googleapis.com/v1/userinfo
+            user-name-attribute: sub

@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html layout:decorate="~{layout}" xmlns:th="http://www.thymeleaf.org" xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout">
+<div layout:fragment="content" class="mx-auto max-w-4xl px-4 py-10">
+
+    <div class="bg-black/80 rounded-2xl shadow-xl p-8 border border-yellow-700 mb-8"
+         style="box-shadow:0 0 30px rgba(212,175,55,0.2);">
+        <h1 class="text-4xl font-bold text-yellow-300 mb-4 font-cinzel tracking-wider" th:text="${profile.username} + '의 프로필'">사용자 프로필</h1>
+        <p class="text-xl text-gray-300">
+            <span class="font-semibold text-yellow-400">이메일:</span>
+            <span th:text="${profile.email}" class="ml-2"></span>
+        </p>
+    </div>
+
+    <div class="space-y-8">
+        <div class="bg-black/80 rounded-2xl shadow-xl p-8 border border-yellow-700"
+             style="box-shadow:0 0 30px rgba(212,175,55,0.2);">
+            <h3 class="text-2xl font-bold text-yellow-400 mb-5 border-b border-gray-700 pb-3">내가 쓴 질문</h3>
+            <ul class="space-y-4">
+                <li th:each="q : ${profile.questions}" class="bg-gray-900 rounded-lg p-4 border border-gray-700 hover:border-yellow-600 transition">
+                    <a th:href="@{|/question/detail/${q.id}|}" class="block">
+                        <b class="text-gray-200 text-lg hover:text-yellow-300 transition" th:text="${q.subject}"></b>
+                        <div class="text-gray-400 text-sm mt-1">
+                            <span th:text="${#temporals.format(q.createDate, 'yyyy-MM-dd HH:mm')}"></span>
+                            <span th:if="${q.modifyDate != null}" class="ml-2 text-yellow-500">[수정됨]</span>
+                        </div>
+                    </a>
+                </li>
+                <li th:if="${#lists.isEmpty(profile.questions)}" class="text-gray-400 text-center py-4">
+                    작성한 질문이 없습니다.
+                </li>
+            </ul>
+        </div>
+
+        <div class="bg-black/80 rounded-2xl shadow-xl p-8 border border-yellow-700"
+             style="box-shadow:0 0 30px rgba(212,175,55,0.2);">
+            <h3 class="text-2xl font-bold text-yellow-400 mb-5 border-b border-gray-700 pb-3">내가 쓴 답변</h3>
+            <ul class="space-y-4">
+                <li th:each="a : ${profile.answers}" class="bg-gray-900 rounded-lg p-4 border border-gray-700 hover:border-yellow-600 transition">
+                    <a th:href="@{|/question/detail/${a.questionId}#answer_${a.id}|}" class="block">
+                        <span class="text-yellow-500 font-semibold" th:text="'[' + ${a.questionSubject} + '] '"></span>
+                        <span class="text-gray-200" th:text="${a.content}"></span>
+                        <div class="text-gray-400 text-sm mt-1">
+                            <span th:text="${#temporals.format(a.createDate, 'yyyy-MM-dd HH:mm')}"></span>
+                            <span th:if="${a.modifyDate != null}" class="ml-2 text-yellow-500">[수정됨]</span>
+                        </div>
+                    </a>
+                </li>
+                <li th:if="${#lists.isEmpty(profile.answers)}" class="text-gray-400 text-center py-4">
+                    작성한 답변이 없습니다.
+                </li>
+            </ul>
+        </div>
+
+        <div class="bg-black/80 rounded-2xl shadow-xl p-8 border border-yellow-700"
+             style="box-shadow:0 0 30px rgba(212,175,55,0.2);">
+            <h3 class="text-2xl font-bold text-yellow-400 mb-5 border-b border-gray-700 pb-3">내가 쓴 댓글</h3>
+            <ul class="space-y-4">
+                <li th:each="c : ${profile.comments}" class="bg-gray-900 rounded-lg p-4 border border-gray-700 hover:border-yellow-600 transition">
+                    <a th:href="@{|/question/detail/${c.questionId}#${c.targetType == 'ANSWER' ? 'answer_' + c.targetId : ''}|}" class="block">
+                        <span class="text-yellow-500 font-semibold" th:text="'(' + ${c.targetType} + ') '"></span>
+                        <span class="text-gray-300" th:text="${c.targetSummary}"></span>:
+                        <span class="text-gray-200" th:text="${c.content}"></span>
+                        <div class="text-gray-400 text-sm mt-1">
+                            <span th:text="${#temporals.format(c.createDate, 'yyyy-MM-dd HH:mm')}"></span>
+                            <span th:if="${c.modifyDate != null}" class="ml-2 text-yellow-500">[수정됨]</span>
+                        </div>
+                    </a>
+                </li>
+                <li th:if="${#lists.isEmpty(profile.comments)}" class="text-gray-400 text-center py-4">
+                    작성한 댓글이 없습니다.
+                </li>
+            </ul>
+        </div>
+    </div>
+
+</div>
+</html>
